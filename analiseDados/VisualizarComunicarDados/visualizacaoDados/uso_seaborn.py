@@ -2,7 +2,7 @@ import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('D:/GitHub/Cursos-EBAC/VisualizarComunicarDados/matematicaEstatistica/estatisticaBasica/clientes-v3-preparado.csv')
+df = pd.read_csv(r'D:\GitHub\Cursos-EBAC\analiseDados\VisualizarComunicarDados\matematicaEstatistica\estatisticaBasica\clientes-v3-preparado.csv')
 
 # Grafico de dispersão
 sns.jointplot(x='idade', y='salario', data=df, kind='scatter')
@@ -16,6 +16,8 @@ plt.show()
 
 # Grafico PairPlot - Densidade e Histograma
 sns.pairplot(df[['idade', 'salario', 'anos_experiencia', 'nivel_educacao']])
+plt.title('Pairplot')
+plt.show()
 
 # Grafico de Regressao
 sns.regplot(x='idade', y='salario', data=df, color='#278f65', scatter_kws={'alpha':0.5, 'color': '#34c289'})
