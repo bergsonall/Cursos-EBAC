@@ -19,17 +19,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS produtos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome TEXT NOT NULL,
-      quantidade INTEGER NOT NULL,
-      preco REAL NOT NULL
-    )
-  `);
-});
-
 db.exec(require("fs").readFileSync("schema.sql", "utf8"));
 
 module.exports = db;
