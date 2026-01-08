@@ -20,37 +20,43 @@ app.post("/produtos", (req, res) => {
   );
 });
 
-// READ
-app.get("/produtos", (req, res) => {
-  db.all("SELECT * FROM produtos", [], (err, rows) => {
-    if (err) return res.status(500).json(err);
-    res.json(rows);
-  });
-});
-
 // UPDATE
-app.put("/produtos/:id", (req, res) => {
+app.put('/produtos', (req, res) => {
   const { nome, quantidade, preco } = req.body;
-  const { id } = req.params;
+
+
+  if (!nome) {
+    return res.status(400).json({ erro: 'Nome do produto é obrigatório' });
+  }
+
 
   db.run(
-    "UPDATE produtos SET nome=?, quantidade=?, preco=? WHERE id=?",
-    [nome, quantidade, preco, id],
+    `UPDATE produtos SET quantidade = ?, preco = ? WHERE nome = ?`,
+    [quantidade, preco, nome],
     function (err) {
       if (err) return res.status(500).json(err);
-      res.json({ updated: this.changes });
+
+
+      if (this.changes === 0) {
+        return res.status(404).json({ erro: 'Produto não encontrado' });
+      }
+
+
+      res.json({ mensagem: 'Produto alterado com sucesso' });
     }
   );
 });
 
 // DELETE
-app.delete("/produtos/:id", (req, res) => {
+app.delete("/produtos", (req, res) => {
+  const { nome } = req.body;
+
   db.run(
-    "DELETE FROM produtos WHERE id=?",
-    [req.params.id],
+    "DELETE FROM produtos WHERE nome=?",
+    [nome],
     function (err) {
       if (err) return res.status(500).json(err);
-      res.json({ deleted: this.changes });
+      res.json({ mensagem: 'Produto excluído com sucesso' });
     }
   );
 });
