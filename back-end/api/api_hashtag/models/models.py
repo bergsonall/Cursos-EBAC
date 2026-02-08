@@ -33,7 +33,7 @@ class Order(Base):
     __tablename__ = 'orders'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    status: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="PENDENTE")
     usuario: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("usuarios.id"))
     preco: Mapped[Optional[float]] = mapped_column(Float)
     #itens = 

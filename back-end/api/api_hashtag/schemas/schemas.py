@@ -10,3 +10,9 @@ class UsuarioSchema(BaseModel):
     
     class Config:
         from_attributes = True
+        
+class OrderSchema(BaseModel):
+    usuario : int
+    
+    class Config:
+        from_attributes = True
