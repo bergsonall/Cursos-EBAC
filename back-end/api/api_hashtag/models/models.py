@@ -1,5 +1,4 @@
 from typing import Optional
-
 from sqlalchemy import create_engine, String, Integer, Boolean, Float, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
