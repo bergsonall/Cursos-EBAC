@@ -3,7 +3,7 @@ import sys
 import os
 from main import bcrypt_context, ACCESS_TOKEN_EXPIRE_MINUTE, ALGORITHM, SECRET_KEY
 from models.models import Usuario 
-from routes.dependencies.dependencies import pegar_sessao
+from routes.dependencies.dependencies import pegar_sessao, verificar_token
 from schemas.schemas import UsuarioSchema, LoginSchema
 from sqlalchemy.orm import Session 
 from jose import jwt, JWTError
@@ -18,10 +18,6 @@ def criar_token(id_usuario, duracao_token = timedelta(minutes=ACCESS_TOKEN_EXPIR
     dic_info = {"sub": id_usuario, "exp": expira}
     encoded_jwt = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
     return encoded_jwt
-
-def verificar_token(token, session : Session = Depends(pegar_sessao)):
-    usuario = session.query(Usuario).filter(Usuario.id==1).first()
-    return usuario
 
 def autenticar_usuario(email, senha, session):
     usuario = session.query(Usuario).filter(Usuario.email == email).first()
@@ -65,8 +61,7 @@ async def login(login_schema : LoginSchema, session : Session = Depends(pegar_se
         }
         
 @auth_router.get("/refresh")
-async def use_refresh_token(token):
-    usuario = verificar_token(token)
+async def use_refresh_token(usuario: Usuario = Depends(verificar_token)):
     access_token = criar_token(usuario.id)
     return {
             "access_token" : access_token,
