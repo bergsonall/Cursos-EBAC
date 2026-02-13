@@ -38,9 +38,11 @@ def ler_livros(page: int = 1, limit: int = 10, credentials : HTTPBasicCredential
     start = (page - 1) * limit
     end = start + limit
     
+    sorted_lib = sorted(lib.items(), key=lambda x: x[0])
+    
     livros_page = [
         {'id_livro': id_livro, 'nome_livro' : livro_data['titulo'], 'autor_livro': livro_data['autor'], 'ano_livro': livro_data['ano']}
-        for id_livro, livro_data in list(lib.items())[start:end]
+        for id_livro, livro_data in sorted_lib[start:end]
     ]
     
     return {
