@@ -13,7 +13,7 @@ ACCESS_TOKEN_EXPIRE_MINUTE = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 app = FastAPI()
 
 bcrypt_context = CryptContext(schemes=["argon2"], deprecated = "auto")
-oauth2_schema = OAuth2PasswordBearer(tokenUrl = "auth/login")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl = "auth/login-form")
 
 # agora os imports funcionam
 from routes.auth_routes import auth_router

@@ -1,45 +1,71 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 from typing import Optional
+import secrets
 
-
+secutiry = HTTPBasic()
 app = FastAPI()
-tarefas = []
+tasks = []
     
-class Tarefa(BaseModel):
+class Task(BaseModel):
     nome : str
     descricao : str
     concluida : Optional[bool] = False
     
-@app.post("/adicionar")
-async def adicionar_tarefa(tarefa: Tarefa):
-    if any(t.nome == tarefa.nome for t in tarefas):
-        raise HTTPException(status_code=400, detail="Essa tarefa já existe.")
-    else:
-        tarefas.append(tarefa)
-        return {'message': 'Tarefa adicionada com sucesso.'}
+user = 'admin'
+password = 'admin'
+
+def autenticar_usuario(credentials: HTTPBasicCredentials = Depends(secutiry)):
+    is_correct_username = secrets.compare_digest(credentials.username, user)
+    is_correct_password = secrets.compare_digest(credentials.password, user)
     
-@app.get("/tarefas")
-async def ler_tarefas():
-    if len(tarefas) == 0:
-       return {'message': 'Não existe nenhuma tarefa.'}
+    if not (is_correct_password and is_correct_username):
+        raise HTTPException(status_code=401, detail='unauthorized user')
+
+@app.post("/adicionar")
+async def adicionar_Task(Task: Task, credentials: HTTPBasicCredentials = Depends(autenticar_usuario)):
+    if any(t.nome == Task.nome for t in tasks):
+        raise HTTPException(status_code=400, detail="Essa Task já existe.")
     else:
-        return {'Tarefas': tarefas} 
+        tasks.append(Task)
+        return {'message': 'Task adicionada com sucesso.'}
+    
+@app.get("/tasks")
+async def ler_tasks(page:int = 1, limit:int =10, credentials: HTTPBasicCredentials = Depends(autenticar_usuario)):
+    
+    if page <1 or limit <1:
+        raise HTTPException(status_code=400, detail='limit or page invalid')
+    
+    start = (page-1)*limit
+    end = page + limit
+    
+    if len(tasks) == 0:
+       return {'message': 'Não existe nenhuma Task.'} 
+   
+    sorted_tasks = sorted(tasks, key=lambda x: x.nome)
+   
+    return {
+        'page': page,
+        'limit': limit,
+        'total': len(tasks),
+        'tasks': sorted_tasks[start:end]
+    }
 
 @app.put("/atualizar_status/{nome}")
-async def atualizar_status(nome: str):
-    tarefa = next((t for t in tarefas if t.nome == nome), None)
-    if tarefa is None:
-        raise HTTPException(status_code=404, detail='Tarefa não encontrada.')
+async def atualizar_status(nome: str, credentials: HTTPBasicCredentials = Depends(autenticar_usuario)):
+    Task = next((t for t in tasks if t.nome == nome), None)
+    if Task is None:
+        raise HTTPException(status_code=404, detail='Task não encontrada.')
     else:
-        tarefa.concluida = True
-        return {'message': 'Tarefa concluida.'}
+        Task.concluida = True
+        return {'message': 'Task concluida.'}
     
 @app.delete("/deletar/{nome}")
-async def deletar_tarefa(nome: str):
-    tarefa = next((t for t in tarefas if t.nome == nome), None)
-    if tarefa is None:
-        raise HTTPException(status_code=404, detail='Tarefa não encontrada.')
+async def deletar_Task(nome: str, credentials: HTTPBasicCredentials = Depends(autenticar_usuario)):
+    Task = next((t for t in tasks if t.nome == nome), None)
+    if Task is None:
+        raise HTTPException(status_code=404, detail='Task não encontrada.')
     else:
-        tarefas.remove(tarefa)
-        return {'message': 'Tarefa deletada com sucesso.'}
+        tasks.remove(Task)
+        return {'message': 'Task deletada com sucesso.'}

@@ -8,6 +8,7 @@ from schemas.schemas import UsuarioSchema, LoginSchema
 from sqlalchemy.orm import Session 
 from jose import jwt, JWTError
 from datetime import timedelta, datetime, timezone
+from fastapi.security import OAuth2PasswordRequestForm
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
@@ -16,7 +17,7 @@ sys.path.append(
 def criar_token(id_usuario, duracao_token = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE)):
     expira = datetime.now(timezone.utc) + duracao_token
     dic_info = {"sub": id_usuario, "exp": expira}
-    encoded_jwt = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
+    encoded_jwt = str(jwt.encode(dic_info, SECRET_KEY, ALGORITHM))
     return encoded_jwt
 
 def autenticar_usuario(email, senha, session):
@@ -57,6 +58,18 @@ async def login(login_schema : LoginSchema, session : Session = Depends(pegar_se
         return {
             "access_token" : access_token,
             "refresh_token" : refresh_token,
+            "token_type" : "Bearer"
+        }
+        
+@auth_router.post("/login-form")
+async def login_form(dados_formulario : OAuth2PasswordRequestForm = Depends(), session : Session = Depends(pegar_sessao)):
+    usuario = autenticar_usuario(dados_formulario.username , dados_formulario.password, session)
+    if not usuario:
+        raise HTTPException(status_code=400, detail="Email não cadastrado.")
+    else:
+        access_token = criar_token(usuario.id)
+        return {
+            "access_token" : access_token,
             "token_type" : "Bearer"
         }
         
