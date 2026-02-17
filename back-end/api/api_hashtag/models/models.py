@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy import create_engine, String, Integer, Boolean, Float, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 # Cria conexao com o banco de dados
 db = create_engine("sqlite:///database/banco.db")
@@ -36,7 +36,7 @@ class Order(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="PENDENTE")
     usuario: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("usuarios.id"))
     preco: Mapped[Optional[float]] = mapped_column(Float)
-    #itens = 
+    itens = relationship("ItemOrder", cascade="all, delete")
     
     def __init__(self, id, status, usuario, preco=0):
         self.id = id
@@ -44,9 +44,11 @@ class Order(Base):
         self.usuario = usuario
         self.preco = preco
         
+    def calc_preco(self):
+        self.preco = sum(item.quantidade * item.preco_unitario for item in self.itens)
         
         
-class itemOrder(Base):
+class ItemOrder(Base):
     __tablename__ = 'itens_order'
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

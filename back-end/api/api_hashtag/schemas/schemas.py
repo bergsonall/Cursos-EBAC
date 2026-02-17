@@ -23,3 +23,12 @@ class LoginSchema(BaseModel):
     
     class Config:
         from_attributes = True
+        
+class ItemOrderSchema(BaseModel):
+    sabor: str
+    preco_unitario: float
+    quantidade: int
+    tamanho: str
+    
+    class Config:
+        from_attributes = True

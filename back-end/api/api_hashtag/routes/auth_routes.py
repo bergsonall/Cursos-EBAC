@@ -16,8 +16,8 @@ sys.path.append(
 
 def criar_token(id_usuario, duracao_token = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE)):
     expira = datetime.now(timezone.utc) + duracao_token
-    dic_info = {"sub": id_usuario, "exp": expira}
-    encoded_jwt = str(jwt.encode(dic_info, SECRET_KEY, ALGORITHM))
+    dic_info = {"sub": str(id_usuario), "exp": expira}
+    encoded_jwt = jwt.encode(dic_info, SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
 def autenticar_usuario(email, senha, session):
@@ -27,7 +27,6 @@ def autenticar_usuario(email, senha, session):
     elif not bcrypt_context.verify(senha, usuario.senha):
         return False
     return usuario
-        
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
